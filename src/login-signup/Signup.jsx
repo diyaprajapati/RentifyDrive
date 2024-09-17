@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import Button from '../Button';
+import '../index.css'
 
 export default function Signup() {
     const [popup, setPopup] = useState({
@@ -96,29 +97,35 @@ export default function Signup() {
                     <div className='flex flex-col p-4 gap-3 w-80'>
                         <div className='flex flex-col space-y-2'>
                             <label className='font-medium text-left'>E-mail:</label>
-                            <input
-                                className='border-2 py-2 px-8 rounded-md focus:outline-none border-gray-400'
-                                type='email'
-                                name='email'
-                                placeholder='xyz@gmail.com'
-                                value={signupData.email}
-                                required
-                                onChange={handleRegistrationChange}
-                            />
+                            <div className='relative'>
+                                <input
+                                    className='custom-input peer border-b-2 border-gray-300 py-2 focus:outline-none'
+                                    type='email'
+                                    name='email'
+                                    placeholder='xyz@gmail.com'
+                                    value={signupData.email}
+                                    required
+                                    onChange={handleRegistrationChange}
+                                />
+                                <span className="input-underline peer-focus:w-full"></span>
+                            </div>
                         </div>
 
                         {/* password */}
                         <div className='flex flex-col space-y-2'>
                             <label className='font-medium text-left'>Password:</label>
-                            <input
-                                className='border-2 py-2 px-8 rounded-md focus:outline-none border-gray-400'
-                                type='password'
-                                name='password'
-                                placeholder='password'
-                                value={signupData.password}
-                                required
-                                onChange={handleRegistrationChange}
-                            />
+                            <div className='relative'>
+                                <input
+                                    className='custom-input peer border-b-2 border-gray-300 py-2 focus:outline-none'
+                                    type='password'
+                                    name='password'
+                                    placeholder='password'
+                                    value={signupData.password}
+                                    required
+                                    onChange={handleRegistrationChange}
+                                />
+                                <span className="input-underline peer-focus:w-full"></span>
+                            </div>
                         </div>
 
                         {/* Confirm password */}

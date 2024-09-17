@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Button from '../Button';
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { app } from '../utils/firebase';
+import '../index.css'
 
 export default function Login() {
 
@@ -101,31 +102,38 @@ export default function Login() {
 
                     {/* email */}
                     <div className='flex flex-col p-4 gap-3 w-80'>
-                        <div className='flex flex-col space-y-2'>
+                        <div className='flex flex-col space-y-1'>
                             <label className='font-medium text-left'>E-mail:</label>
-                            <input 
-                                className='border-2 py-2 px-8 rounded-md focus:outline-none border-gray-400' 
-                                type='email' 
-                                placeholder='xyz@gmail.com' 
-                                name='email'
-                                value={loginData.email} 
-                                onChange={handleLoginChange} 
-                                required
-                            />
+                            <div className="relative">
+                                <input 
+                                    className='custom-input peer border-b-2 border-gray-300 py-2 focus:outline-none' 
+                                    type='email' 
+                                    placeholder='xyz@gmail.com' 
+                                    name='email'
+                                    value={loginData.email} 
+                                    onChange={handleLoginChange} 
+                                    required
+                                />
+                                <span className="input-underline peer-focus:w-full"></span>
+                            </div>
                         </div>
 
                         {/* password */}
-                        <div className='flex flex-col space-y-2'>
+                        <div className='flex flex-col space-y-1'>
                             <label className='font-medium text-left'>Password:</label>
-                            <input 
-                                className='border-2 py-2 px-8 rounded-md focus:outline-none border-gray-400' 
-                                type='password' 
-                                placeholder='password' 
-                                name='password'
-                                value={loginData.password} 
-                                onChange={handleLoginChange} 
-                                required 
-                            />
+
+                            <div className="relative">
+                                <input 
+                                    className='custom-input peer border-b-2 border-gray-300 py-2 focus:outline-none' 
+                                    type='password' 
+                                    placeholder='password' 
+                                    name='password'
+                                    value={loginData.password} 
+                                    onChange={handleLoginChange} 
+                                    required 
+                                />
+                                <span className="input-underline peer-focus:w-full"></span>
+                            </div>
                         </div>
                     </div>
 
