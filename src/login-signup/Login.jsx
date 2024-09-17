@@ -12,7 +12,8 @@ export default function Login() {
 
     const [loginData, setLoginData] = useState({
         email: '',
-        password: ''
+        password: '',
+        rememberMe: false // Add rememberMe to state
     });
 
     const navigate = useNavigate();  
@@ -24,6 +25,15 @@ export default function Login() {
             const response = await axios.post('http://localhost:3000/login', loginData);
 
             if (response.status === 200) {  
+                const { token } = response.data; // Assume your backend returns a token
+                
+                // Save the token in localStorage or sessionStorage based on rememberMe
+                if (loginData.rememberMe) {
+                    localStorage.setItem('authToken', token); // Store in localStorage if "Remember Me" is checked
+                } else {
+                    sessionStorage.setItem('authToken', token); // Otherwise, store in sessionStorage
+                }
+
                 setPopup({ visible: true, message: 'Login Successfully!', success: true });
                 setTimeout(() => {
                     navigate('/food');  
@@ -38,7 +48,8 @@ export default function Login() {
         // Reset login data only if successful
         setLoginData({
             email: '',
-            password: ''
+            password: '',
+            rememberMe: false // Reset the checkbox as well
         });
 
         // Hide popup after 3 seconds
@@ -48,10 +59,10 @@ export default function Login() {
     }
 
     const handleLoginChange = (e) => {
-        const { name, value } = e.target;
+        const { name, value, type, checked } = e.target;
         setLoginData((prevData) => ({
             ...prevData,
-            [name]: value
+            [name]: type === 'checkbox' ? checked : value // Handle checkbox state
         }));
     }
 
@@ -91,6 +102,18 @@ export default function Login() {
                                 required 
                             />
                         </div>
+                    </div>
+
+                    {/* Remember me */}
+                    <div className='flex flex-row mb-3 gap-2'>
+                        <input
+                            type='checkbox' 
+                            name='rememberMe' 
+                            checked={loginData.rememberMe} 
+                            onChange={handleLoginChange} 
+                            className='rounded focus:outline-none border-gray-400 bg-blue-500'
+                        />
+                        <label className='font-medium'>Remember Me</label>
                     </div>
 
                     {/* Button */}
