@@ -2,8 +2,33 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import Button from '../Button';
+import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { app } from '../utils/firebase';
 
 export default function Login() {
+
+    const provider = new GoogleAuthProvider();
+
+    const doAuth = async () => {
+        const auth = getAuth(app);
+        signInWithPopup(auth, provider)
+          .then((result) => {
+            
+            const credential = GoogleAuthProvider.credentialFromResult(result);
+            const token = credential.accessToken;
+            const user = result.user;
+        
+            console.log(token, user);
+          })
+          .catch((error) => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            const email = error.customData.email;
+            const credential = GoogleAuthProvider.credentialFromError(error);
+            console.log(errorCode, errorMessage, email, credential);
+          });
+    }
+
     const [popup, setPopup] = useState({
         visible: false,
         message: '',
@@ -123,6 +148,12 @@ export default function Login() {
                             <p>{popup.message}</p>
                         </div>
                     )}
+
+                    {/* Login with google account */}
+                    <div onClick={doAuth}  className='flex flex-row gap-5 border-2 border-neutral-400 mt-8 px-7 py-2 hover:scale-105 hover:transition-all hover:ease-in-out duration-200 rounded-md cursor-pointer'>
+                        <img src='./google.png' className='h-8'/>
+                        <button className='font-medium'>Login with google account</button>
+                    </div>
 
                     {/* signup if doesn't login */}
                     <div className='flex gap-4 mt-3'>
