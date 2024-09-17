@@ -131,15 +131,18 @@ export default function Signup() {
                         {/* Confirm password */}
                         <div className='flex flex-col space-y-2'>
                             <label className='font-medium text-left'>Confirm Password:</label>
-                            <input
-                                className='border-2 py-2 px-8 rounded-md focus:outline-none border-gray-400'
-                                type='password'
-                                name='confirmPassword'
-                                placeholder='password'
-                                value={signupData.confirmPassword}
-                                required
-                                onChange={handleRegistrationChange}
-                            />
+                            <div>
+                                <input
+                                    className='custom-input peer border-b-2 border-gray-300 py-2 focus:outline-none'
+                                    type='password'
+                                    name='confirmPassword'
+                                    placeholder='password'
+                                    value={signupData.confirmPassword}
+                                    required
+                                    onChange={handleRegistrationChange}
+                                />
+                                <span className="input-underline peer-focus:w-full"></span>
+                            </div>
                         </div>
                     </div>
 
