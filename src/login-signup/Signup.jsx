@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Button from "../Button";
+import Button from "../components/Button";
 import "../index.css";
 import toast from "react-hot-toast";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
@@ -107,7 +107,7 @@ export default function Signup() {
           {/* signup if doesn't login */}
           <div className="flex gap-4 mt-3">
             <p>Already have an account?</p>
-            <Link className="font-normal underline hover:font-medium" to="/">
+            <Link className="font-normal underline hover:font-medium" to="/login">
               {" "}
               Login{" "}
             </Link>
