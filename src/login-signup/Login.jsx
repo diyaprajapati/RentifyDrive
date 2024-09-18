@@ -10,6 +10,7 @@ import {
 import { app } from "../utils/firebase";
 import "../index.css";
 import toast from "react-hot-toast";
+import RetroGrid from "../components/RetroGrid";
 
 export default function Login() {
   const provider = new GoogleAuthProvider();
@@ -72,12 +73,12 @@ export default function Login() {
       <div className="w-full h-full">
         <div className="flex flex-col justify-center items-center h-full">
           {/* Label */}
-          <h1 className="text-3xl p-6 font-semibold">Log-In</h1>
+          <h1 className="text-3xl p-6 font-bold text-white">Log-In</h1>
 
           {/* email */}
           <div className="flex flex-col p-4 gap-3 w-80">
             <div className="flex flex-col space-y-1">
-              <label className="font-medium text-left">E-mail:</label>
+              <label className="font-medium text-left text-white">E-mail:</label>
               <div className="relative">
                 <input
                   className="custom-input peer border-b-2 border-gray-300 py-2 focus:outline-none"
@@ -94,7 +95,7 @@ export default function Login() {
 
             {/* password */}
             <div className="flex flex-col space-y-1">
-              <label className="font-medium text-left">Password:</label>
+              <label className="font-medium text-left text-white">Password:</label>
 
               <div className="relative">
                 <input
@@ -120,7 +121,7 @@ export default function Login() {
               onChange={handleLoginChange}
               className="rounded focus:outline-none border-gray-400 bg-blue-500"
             />
-            <label className="font-medium">Remember Me</label>
+            <label className="font-medium text-white">Remember Me</label>
           </div>
 
           {/* Button */}
@@ -132,11 +133,11 @@ export default function Login() {
             className="flex flex-row gap-5 border-2 border-neutral-400 mt-8 px-7 py-2 hover:scale-105 hover:transition-all hover:ease-in-out duration-200 rounded-md cursor-pointer"
           >
             <img src="./google.png" className="h-8" />
-            <button className="font-medium">Login with google account</button>
+            <button className="font-medium text-white">Login with Google</button>
           </div>
 
           {/* signup if doesn't login */}
-          <div className="flex gap-4 mt-3">
+          <div className="flex gap-4 mt-3 text-white">
             <p>Don't have an account?</p>
             <Link
               className="font-normal underline hover:font-medium"
@@ -148,6 +149,7 @@ export default function Login() {
           </div>
         </div>
       </div>
+      <RetroGrid/>
     </div>
   );
 }

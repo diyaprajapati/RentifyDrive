@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-    background-color: aliceblue;
+    background-color: rgb(15 23 42);
 }
 
 .custom-input {
@@ -13,6 +13,7 @@ body {
     background-color: transparent;
     padding: 10px 0;
     transition: border-color 0.3s;
+    color: white;
   }
   
   .custom-input:focus {
