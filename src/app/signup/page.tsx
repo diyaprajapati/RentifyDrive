@@ -11,7 +11,6 @@ import {
 import { Input } from "@/components/ui/input"
 import { redirect } from 'next/navigation'
 import { Label } from "@/components/ui/label"
-import { GoogleLogin, googleLogout, GoogleOAuthProvider } from "@react-oauth/google"
 import { jwtDecode } from "jwt-decode"
 import { useEffect, useState } from "react"
 
@@ -40,6 +39,7 @@ export function SignupForm() {
     }
   };
 
+
   useEffect(() => {
     const loginData = localStorage.getItem("loginData");
     if (loginData) {
@@ -50,7 +50,7 @@ export function SignupForm() {
     if (loginData) {
       //@ts-ignore
       const decodedUser = jwtDecode(loginData.sessionToken);
-      if(decodedUser){
+      if (decodedUser) {
         redirect("/home")
       }
     }
@@ -94,16 +94,9 @@ export function SignupForm() {
             <Button type="submit" className="w-full">
               Create an account
             </Button>
-            <button className="w-full" type="button">
-              <GoogleOAuthProvider clientId={CLIENT_ID!}>
-                <GoogleLogin
-                  onSuccess={(credentialResponse) => {
-                    handelLogin(credentialResponse.credential);
-                  }}
-                  onError={() => { }}
-                />
-              </GoogleOAuthProvider>
-            </button>
+            <Button className="w-full" onClick={() => login()}>
+              Sign in with Google
+            </Button>
           </div>
           <div className="mt-4 text-center text-sm">
             Already have an account?{" "}
