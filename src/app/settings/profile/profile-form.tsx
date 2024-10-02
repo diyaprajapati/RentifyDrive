@@ -1,4 +1,5 @@
-import React, { useRef, useState } from "react";
+"use client"
+import React, { Suspense, useEffect, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -16,23 +17,22 @@ import {
 import { ImageIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import axios from "axios";
+import { base64ToFile, getSessionToken } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 const MAX_FILE_SIZE = 5000000;
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/gif"];
 
 const profileFormSchema = z.object({
-  name: z
-    .string()
-    .min(2, { message: "Name must be at least 2 characters." })
-    .max(50, { message: "Name must not be longer than 50 characters." }),
   address: z
     .string()
     .min(5, { message: "Address must be at least 5 characters." })
     .max(200, { message: "Address must not be longer than 200 characters." }),
-  mobile: z.string().regex(/^\+?[1-9]\d{1,14}$/, {
+  mobileNumber: z.string().regex(/^\+?[1-9]\d{1,14}$/, {
     message: "Please enter a valid mobile number.",
   }),
-  image: z
+  file: z
     .any()
     .refine((files) => files?.length == 1, "Image is required.")
     .refine(
@@ -45,33 +45,80 @@ const profileFormSchema = z.object({
     ),
 });
 
-type ProfileFormValues = z.infer<typeof profileFormSchema>;
+export type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 const defaultValues: Partial<ProfileFormValues> = {
-  name: "",
   address: "",
-  mobile: "",
+  mobileNumber: "",
+};
+type ProfileFormProps = {
+  initialValues?: Partial<ProfileFormValues>;
+  name?: string;
 };
 
-export function ProfileForm() {
+export function ProfileForm({ initialValues, name }: ProfileFormProps) {
+  const { push } = useRouter();
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
-    defaultValues,
-    mode: "onChange",
+    defaultValues: initialValues ?? defaultValues,
+    mode: "all",
   });
 
-  function onSubmit(data: ProfileFormValues) {
-    toast({
-      title: "You submitted the following values:",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
+  async function onSubmit(data: ProfileFormValues) {
+    // toast({
+    //   title: "You submitted the following values:",
+    //   description: (
+    //     <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
+    //       <code className="text-white">{JSON.stringify(data, null, 2)}</code>
+    //     </pre>
+    //   ),
+    // });
+    // const sessionToken = await getSessionToken();
+    // if (!sessionToken) {
+    //   push("/signup");
+    // }
+    // const res = await axios.put("http://localhost:3001/users/profile", data, {
+    //   headers: {
+    //     Authorization: `Bearer ${sessionToken}`,
+    //   },
+    // });
+    // console.log(res);
+    const formData = new FormData();
+    formData.append('address', data.address);
+    formData.append('mobileNumber', data.mobileNumber);
+
+    if (data.file && data.file[0]) {
+      formData.append('image', data.file[0]);
+    }
+
+    try {
+      const sessionToken = await getSessionToken();
+      if (!sessionToken) {
+        push("/signup");
+        return;
+      }
+
+      const res = await axios.put("http://localhost:3001/users/profile", formData, {
+        headers: {
+          'Authorization': `Bearer ${sessionToken}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      toast({
+        title: "Profile updated successfully",
+        description: "Your profile information has been updated.",
+      });
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast({
+        title: "Error updating profile",
+        description: "There was an error updating your profile. Please try again.",
+        variant: "destructive",
+      });
+    }
   }
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,28 +129,28 @@ export function ProfileForm() {
         setImagePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
+      form.setValue("file", file);
     }
   };
 
+  useEffect(() => {
+    if (initialValues) {
+      Object.keys(initialValues).forEach((key) => {
+        form.setValue(key as keyof ProfileFormValues, initialValues[key as keyof ProfileFormValues]);
+      });
+    }
+    if (initialValues?.file && typeof initialValues.file === "string") {
+      const file = base64ToFile(initialValues.file, "uploaded_image.png");
+      form.setValue("file", [file]); // Set file as array with one File object
+      setImagePreview(initialValues.file); // Show the base64 image as preview
+    }
+  }, [initialValues, form]);
+
   return (
     <Form {...form}>
+      <Suspense fallback={<div>Loading...</div>}>
+      <div>{name ? `Hello! ${name}` : "Hello User"}</div>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Name</FormLabel>
-              <FormControl>
-                <Input placeholder="John Doe" {...field} />
-              </FormControl>
-              <FormDescription>
-                This is your full name. You can use your real name or a pseudonym.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
         <FormField
           control={form.control}
           name="address"
@@ -117,16 +164,14 @@ export function ProfileForm() {
                   {...field}
                 />
               </FormControl>
-              <FormDescription>
-                Please enter your full address.
-              </FormDescription>
+              <FormDescription>Please enter your full address.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
         <FormField
           control={form.control}
-          name="mobile"
+          name="mobileNumber"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Mobile Number</FormLabel>
@@ -142,10 +187,10 @@ export function ProfileForm() {
         />
         <FormField
           control={form.control}
-          name="image"
+          name="file"
           render={({ field: { value, onChange, ...field } }) => (
             <FormItem>
-              <FormLabel>Profile Image</FormLabel>
+              <FormLabel>Driving License Image</FormLabel>
               <FormControl>
                 <div className="flex items-center space-x-2">
                   <ImageIcon className="h-4 w-4" />
@@ -162,12 +207,17 @@ export function ProfileForm() {
                 </div>
               </FormControl>
               <FormDescription>
-                Upload a profile picture. Max size: 5MB. Formats: .jpg, .png, .gif
+                Upload a driving license photo. Max size: 1MB. Formats: .jpg, .png,
+                .gif
               </FormDescription>
               <FormMessage />
               {imagePreview && (
                 <div className="mt-2">
-                  <img src={imagePreview} alt="Preview" className="max-w-full h-auto rounded-md" />
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="max-w-full h-auto rounded-md"
+                  />
                 </div>
               )}
             </FormItem>
@@ -175,6 +225,7 @@ export function ProfileForm() {
         />
         <Button type="submit">Update profile</Button>
       </form>
+      </Suspense>
     </Form>
   );
 }

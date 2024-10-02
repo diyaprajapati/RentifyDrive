@@ -1,31 +1,33 @@
-"use client"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
+"use client";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { redirect } from 'next/navigation'
-import { Label } from "@/components/ui/label"
-import { jwtDecode } from "jwt-decode"
-import { useEffect, useState } from "react"
-
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { redirect, useRouter } from "next/navigation";
+import { Label } from "@/components/ui/label";
+import { jwtDecode } from "jwt-decode";
+import { useEffect, useState } from "react";
+import { CodeResponse, GoogleLogin, useGoogleLogin } from "@react-oauth/google";
+import { toast } from "@/hooks/use-toast";
+import axios from "axios";
 
 export function SignupForm() {
-
   const CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
   const [loginData, setLoginData] = useState(null);
-  const [user, setUser] = useState({});
+  const { push } = useRouter();
 
-  const handelLogin = async (googleData: any) => {
+  const handleLogin = async (googleData: any) => {
     try {
+      console.log(googleData);
       const res = await fetch("http://localhost:3001/api/google-login", {
         method: "POST",
-        body: JSON.stringify({ token: googleData, }),
+        body: JSON.stringify({ token: googleData.credential }),
         headers: { "Content-Type": "application/json" },
       });
       if (!res.ok) {
@@ -33,12 +35,11 @@ export function SignupForm() {
       }
       const data = await res.json();
       setLoginData(data);
-      localStorage.setItem("loginData", JSON.stringify(data));
+      await localStorage.setItem("loginData", JSON.stringify(data));
     } catch (error) {
       console.error("Error logging in:", error);
     }
   };
-
 
   useEffect(() => {
     const loginData = localStorage.getItem("loginData");
@@ -51,11 +52,10 @@ export function SignupForm() {
       //@ts-ignore
       const decodedUser = jwtDecode(loginData.sessionToken);
       if (decodedUser) {
-        redirect("/home")
+        push("/home");
       }
     }
   }, [loginData]);
-
 
   return (
     <div className="h-full w-full flex flex-col justify-center items-center">
@@ -94,9 +94,15 @@ export function SignupForm() {
             <Button type="submit" className="w-full">
               Create an account
             </Button>
-            <Button className="w-full" onClick={() => login()}>
-              Sign in with Google
-            </Button>
+            <GoogleLogin
+              onSuccess={handleLogin}
+              onError={() =>
+                toast({
+                  title: "Error",
+                  description: "Failed to login with Google",
+                })
+              }
+            ></GoogleLogin>
           </div>
           <div className="mt-4 text-center text-sm">
             Already have an account?{" "}
@@ -107,7 +113,7 @@ export function SignupForm() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
 
 export default SignupForm;
