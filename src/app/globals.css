@@ -12,15 +12,16 @@ body {
   }
 }
 
-
 @layer base {
   :root {
     /* Name: custom color palette
        Author: Ilias Ism
        URL: https://gradient.page */
 
-    .bg-gradient { background: var(--gradient) }
-    --gradient: linear-gradient(to top left,#9890e3,#b1f4cf);
+    .bg-gradient {
+      background: var(--gradient);
+    }
+    --gradient: linear-gradient(to top left, #9890e3, #b1f4cf);
 
     --background: 268 40% 9.84%;
     --foreground: 261 6% 98.65%;
@@ -51,6 +52,9 @@ body {
 
     --ring: 261 60% 73%;
     --radius: 0.5rem;
+
+    --chart-1: 261 60% 73%;
+    --chart-2: 261 60% 73%;
   }
 }
 
@@ -60,7 +64,7 @@ body {
     /* Name: custom color palette
        Author: Ilias Ism
        URL: https://gradient.page */
-     /* .bg-gradient { background: var(--gradient) } */
+/* .bg-gradient { background: var(--gradient) } */
 
 /*    --gradient: linear-gradient(to top left,#000428,#004e92);
     --background: 249 100% 98.16%;
@@ -96,7 +100,6 @@ body {
   }
 }
 */
-
 
 @layer base {
   * {

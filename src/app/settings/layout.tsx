@@ -1,21 +1,25 @@
-import { Separator } from "@/components/ui/separator"
-import { SidebarNav } from "@/components/ui/sidebar-nav"
-import { Metadata } from "next"
-import Image from "next/image"
+import { Separator } from "@/components/ui/separator";
+import { SidebarNav } from "@/components/ui/sidebar-nav";
+import { Metadata } from "next";
+import Image from "next/image";
 
 export const metadata: Metadata = {
   title: "Settings",
-}
+};
 
 const sidebarNavItems = [
   {
     title: "Profile",
     href: "/settings/profile",
   },
-]
+  {
+    title: "Rentals",
+    href: "/settings/rentals",
+  },
+];
 
 interface SettingsLayoutProps {
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 
 export default function SettingsLayout({ children }: SettingsLayoutProps) {
@@ -33,9 +37,9 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
           <aside className="-mx-4 lg:w-1/5">
             <SidebarNav items={sidebarNavItems} />
           </aside>
-          <div className="flex-1 lg:max-w-2xl">{children}</div>
+          <div className="flex-1 lg:max-w-4xl">{children}</div>
         </div>
       </div>
     </>
-  )
+  );
 }
