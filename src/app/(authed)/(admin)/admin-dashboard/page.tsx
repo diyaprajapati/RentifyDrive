@@ -35,12 +35,12 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { getSessionToken } from "@/lib/utils";
-
+import { toast } from "@/hooks/use-toast";
+import { UpdateRentalStatus } from "@/components/update-rental-status";
 interface DashboardData {
   totalRentals: number;
   activeRentals: number;
   revenue: number;
-  activeUsers: number;
   recentRentals: {
     id: number;
     user: string;
@@ -61,6 +61,23 @@ interface DashboardData {
     model: string;
     rentals: number;
   }[];
+  pendingRentals: {
+    _id: string;
+    userId: {
+      _id: string;
+      name: string;
+    };
+    carId: {
+      _id: string;
+      make: string;
+      model: string;
+    };
+    startDate: string;
+    endDate: string;
+    totalCost: number;
+    status: string;
+    paymentReferenceNumber: string;
+  }[];
 }
 
 export default function CarRentalDashboard() {
@@ -68,25 +85,33 @@ export default function CarRentalDashboard() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(
     null
   );
+  const fetchDashboardData = async () => {
+    try {
+      const token = await getSessionToken();
+      const [dashboardResponse, pendingRentalsResponse] = await Promise.all([
+        axios.get("http://localhost:3001/api/rental/dashboard", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        axios.get("http://localhost:3001/api/rental/pending-with-payment", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
+
+      setDashboardData({
+        ...dashboardResponse.data,
+        pendingRentals: pendingRentalsResponse.data.rentals,
+      });
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch dashboard data. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const sessionToken = await getSessionToken();
-        const response = await axios.get(
-          "http://localhost:3001/api/rental/dashboard",
-          {
-            headers: {
-              Authorization: `Bearer ${sessionToken}`,
-            },
-          }
-        );
-        setDashboardData(response.data);
-      } catch (error) {
-        console.error("Error fetching dashboard data:", error);
-      }
-    };
-
     fetchDashboardData();
   }, []);
 
@@ -103,6 +128,7 @@ export default function CarRentalDashboard() {
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="pending-rentals">Pending Rentals</TabsTrigger>
         </TabsList>
         <TabsContent value="overview" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -140,19 +166,6 @@ export default function CarRentalDashboard() {
               <CardContent>
                 <div className="text-2xl font-bold">
                   ₹ {dashboardData.revenue.toFixed(2)}
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Active Users
-                </CardTitle>
-                <UsersIcon className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {dashboardData.activeUsers}
                 </div>
               </CardContent>
             </Card>
@@ -302,6 +315,51 @@ export default function CarRentalDashboard() {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+        <TabsContent value="pending-rentals" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Pending Rentals with Payment</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>User</TableHead>
+                    <TableHead>Car</TableHead>
+                    <TableHead>Dates</TableHead>
+                    <TableHead>Total Cost</TableHead>
+                    <TableHead>Payment Ref</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {dashboardData.pendingRentals.map((rental) => (
+                    <TableRow key={rental._id}>
+                      <TableCell>{rental.userId.name}</TableCell>
+                      <TableCell>{`${rental.carId.make} ${rental.carId.model}`}</TableCell>
+                      <TableCell>{`${new Date(
+                        rental.startDate
+                      ).toLocaleDateString()} - ${new Date(
+                        rental.endDate
+                      ).toLocaleDateString()}`}</TableCell>
+                      <TableCell>₹{rental.totalCost.toFixed(2)}</TableCell>
+                      <TableCell>{rental.paymentReferenceNumber}</TableCell>
+                      <TableCell>{rental.status}</TableCell>
+                      <TableCell>
+                        <UpdateRentalStatus
+                          rentalId={rental._id}
+                          currentStatus={rental.status}
+                          onUpdate={fetchDashboardData}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
